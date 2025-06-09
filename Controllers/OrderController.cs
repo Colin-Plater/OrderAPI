@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
 using OrderAPI.Models;
 
 namespace OrderAPI.Controllers
 {
-    public class HomeController : Controller
+    public class OrderController : ApiController
     {
-        public string CreateOrder(string CustomerName, DateTime OrderDate, decimal TotalAmount, List<OrderItem> Items)
+        public string CreateOrder(string CustomerName, decimal TotalAmount, List<OrderItem> Items)
         {
             Order order = new Order();
             order.Id = 0;
             order.CustomerName = CustomerName;
-            order.OrderDate = OrderDate;
+            order.OrderDate = DateTime.Now;
             order.Status = StatusEnum.Pending;
             order.TotalAmount = CaiculateTotalAmount(Items);
             order.Items = Items;
@@ -23,7 +24,7 @@ namespace OrderAPI.Controllers
 
             if (string.IsNullOrEmpty(result))
             {
-                // Save to database
+                SaveOrderToDatabase(order);
             }
 
             return result;
@@ -31,10 +32,8 @@ namespace OrderAPI.Controllers
 
         public string UpdateOrder(int Id, string CustomerName, DateTime OrderDate, StatusEnum Status, decimal TotalAmount, List<OrderItem> Items)
         {
-            // Retrieve from database using Id
-            Order order = new Order();
-            order.Id = Id;
-            
+            Order order = GetOrderFromDatabase(Id);
+
             order.CustomerName = CustomerName;
             order.OrderDate = OrderDate;
             order.Status = Status;
@@ -45,15 +44,35 @@ namespace OrderAPI.Controllers
 
             if (string.IsNullOrEmpty(result))
             {
-                // Save to database
+                SaveOrderToDatabase(order);
             }
 
             return result;
         }
 
+        private Order GetOrderFromDatabase(int Id)
+        {
+            // Return an empty order as I don't have SQL Server 
+
+            Order order = new Order();
+
+            if (Id > 0)
+                order.Id = Id;
+
+            return order;
+        }
+
+        private void SaveOrderToDatabase(Order order)
+        {
+            // Do nothing as I don't have SQL Server
+        }
+
         private string ValidateOrder(Order Order, bool Updating)
         {
             List<String> Errors = new List<string>();
+
+            if (Updating && Order.Id == 0)
+                Errors.Add("Order could not be found");
 
             if (string.IsNullOrEmpty(Order.CustomerName))
                 Errors.Add("Customer Name must not be empty");

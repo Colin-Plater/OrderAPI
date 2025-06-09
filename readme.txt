@@ -1,0 +1,1 @@
+This project was built using Visual Studio 2019 and requires .net 4.7.2
